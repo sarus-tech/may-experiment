@@ -1,0 +1,13 @@
+#WITH DP: epsilon~8
+416501e4c761132b1280d026cf504a3d
+deepspeed:
+  gradient_accumulation_steps: 128
+  physical_batch_size: 8
+  dtype: 'bf16'
+  zero_stage: 1
+noise_multiplier: 1.5
+l2_norm_clip: 0.01
+learning_rate: 5e-4
+epochs: 25
+eval_every_n_grad_steps: 10
+save_every_n_grads_steps: 50

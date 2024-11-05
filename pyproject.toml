@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "may_experiments"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    {name = "Sarus Inc."}
+]
+classifiers = [
+    "Programming Language :: Python :: 3.10",
+]
+dependencies = [
+    "httpx",
+    "datasets",
+    "setuptools"
+]
+dynamic = ["version"]

@@ -1,0 +1,27 @@
+open_mistral_7b
+quantization: True
+lora:
+  lora_attn_modules: ["q_proj","v_proj",'k_proj']
+  apply_lora_to_mlp: True
+  apply_lora_to_output: True
+
+#WITHOUT DP:5d02dd662c2133227cbfb55bdea74bdb
+deepspeed:
+  gradient_accumulation_steps: 32
+  physical_batch_size: 16
+  dtype: 'bf16'
+  zero_stage: 1
+
+learning_rate: 1e-5
+epochs: 10
+eval_every_n_grad_steps: 10
+save_every_n_grads_steps: 50
+
+#WITH DP: epsilon~50k
+9e92d06870fab20c12cb8aa490a4748b
+noise_multiplier: 0.05
+l2_norm_clip: 0.01
+learning_rate: 3e-4
+epochs: 20
+eval_every_n_grad_steps: 10
+save_every_n_grads_steps: 50
