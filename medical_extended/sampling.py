@@ -4,7 +4,6 @@ from pathlib import Path
 curr_path=Path(__file__).parent
 
 def upload_file(client,doc_path,doc_name):
-    
     with open(doc_path, "rb") as training_file:
                 files = {"file":(doc_name, training_file,)}
                 response = client.post(
