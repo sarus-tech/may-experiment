@@ -3,18 +3,17 @@ import os
 from pathlib import Path
 curr_path=Path(__file__).parent
 
-def upload_file(client,doc_path,doc_name):
-    
+def upload_file(client, doc_path, doc_name):
     with open(doc_path, "rb") as training_file:
-                files = {"file":(doc_name, training_file,)}
-                response = client.post(
-                    f"http://localhost:8000/v1/dataset",
-                    files=files,
-                )
+            files = {"file":(doc_name, training_file,)}
+            response = client.post(
+                f"http://localhost:8000/v1/dataset/{doc_name.replace('.', '_')}",
+                files=files,
+            )
     assert response.status_code==200
     return  response.json()["dataset_id"]
 
-def finetune(client,params):
+def finetune(client, params):
     response = client.post(
                     f"http://localhost:8000/v1/new/fine-tune", json=params,
                 )
@@ -27,10 +26,10 @@ with httpx.Client() as client:
     client.post(
                     f"http://localhost:8000/v1/task/94c6e97ebcca1bc3b766951d08b1a66e/status"
                 )
-    train_file=os.path.join(curr_path,'train_ds.jsonl')
-    test_file=os.path.join(curr_path,'test_ds.jsonl')
-    train_ds_uuid=upload_file(client,doc_path=train_file,doc_name='train_ds.jsonl')
-    test_ds_uuid=upload_file(client,doc_path=test_file,doc_name='test_ds.jsonl')
+    train_file=os.path.join(curr_path, 'train_ds.jsonl')
+    test_file=os.path.join(curr_path, 'test_ds.jsonl')
+    train_ds_uuid=upload_file(client, doc_path=train_file, doc_name='train_ds.jsonl')
+    test_ds_uuid=upload_file(client, doc_path=test_file, doc_name='test_ds.jsonl')
     hyperparameters= {"is_dp": True,
         "noise_multiplier":1.5,
         'l2_norm_clip':0.01,
