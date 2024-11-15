@@ -1,0 +1,162 @@
+Experiment: 827b4b999b27364100e502f53b97ec16
+{
+  "sample_type": "instruct",
+  "foundation_model_name": "open_mistral_7b",
+  "train_dataset_id": "train_ds_jsonl",
+  "test_dataset_id": "test_ds_jsonl",
+  "hyperparameters": {
+    "is_dp": true,
+    "noise_multiplier": 0.05,
+    "l2_norm_clip": 0.01,
+    "gradient_accumulation_steps": 32,
+    "physical_batch_size": 16,
+    "learning_rate": 0.0003,
+    "epochs": 15,
+    "use_lora": true,
+    "quantize": true,
+    "apply_lora_to_output": true,
+    "apply_lora_to_mlp": true,
+    "lora_attn_modules": [
+      "q_proj",
+      "v_proj",
+      "k_proj"
+    ],
+    "save_every_n_grad_steps": 50,
+    "eval_every_n_grad_steps": 10
+  }
+}
+Experiment: d2f2586db78fa139a3797034332b7e3a
+{
+  "sample_type": "instruct",
+  "foundation_model_name": "open_mistral_7b",
+  "train_dataset_id": "train_ds_jsonl",
+  "test_dataset_id": "test_ds_jsonl",
+  "hyperparameters": {
+    "is_dp": true,
+    "noise_multiplier": 1.0,
+    "l2_norm_clip": 0.01,
+    "gradient_accumulation_steps": 32,
+    "physical_batch_size": 16,
+    "learning_rate": 0.0003,
+    "epochs": 15,
+    "use_lora": true,
+    "quantize": true,
+    "apply_lora_to_output": true,
+    "apply_lora_to_mlp": true,
+    "lora_attn_modules": [
+      "q_proj",
+      "v_proj",
+      "k_proj"
+    ],
+    "save_every_n_grad_steps": 50,
+    "eval_every_n_grad_steps": 10
+  }
+}
+Experiment: ce91d45be3b2497adede4fa83fa485e4
+{
+  "sample_type": "instruct",
+  "foundation_model_name": "open_mistral_7b",
+  "train_dataset_id": "train_ds_jsonl",
+  "test_dataset_id": "test_ds_jsonl",
+  "hyperparameters": {
+    "is_dp": true,
+    "noise_multiplier": 0.1,
+    "l2_norm_clip": 0.01,
+    "gradient_accumulation_steps": 32,
+    "physical_batch_size": 16,
+    "learning_rate": 0.0003,
+    "epochs": 15,
+    "use_lora": true,
+    "quantize": true,
+    "apply_lora_to_output": true,
+    "apply_lora_to_mlp": true,
+    "lora_attn_modules": [
+      "q_proj",
+      "v_proj",
+      "k_proj"
+    ],
+    "save_every_n_grad_steps": 50,
+    "eval_every_n_grad_steps": 10
+  }
+}
+Experiment: d29bb2fd6096c6d62d872a72685a3c79
+{
+  "sample_type": "instruct",
+  "foundation_model_name": "open_mistral_7b",
+  "train_dataset_id": "train_ds_jsonl",
+  "test_dataset_id": "test_ds_jsonl",
+  "hyperparameters": {
+    "is_dp": true,
+    "noise_multiplier": 0.2,
+    "l2_norm_clip": 0.01,
+    "gradient_accumulation_steps": 32,
+    "physical_batch_size": 16,
+    "learning_rate": 0.0003,
+    "epochs": 15,
+    "use_lora": true,
+    "quantize": true,
+    "apply_lora_to_output": true,
+    "apply_lora_to_mlp": true,
+    "lora_attn_modules": [
+      "q_proj",
+      "v_proj",
+      "k_proj"
+    ],
+    "save_every_n_grad_steps": 50,
+    "eval_every_n_grad_steps": 10
+  }
+}
+Experiment: 77194274d16a603ced9e590fe29a7437
+{
+  "sample_type": "instruct",
+  "foundation_model_name": "open_mistral_7b",
+  "train_dataset_id": "train_ds_jsonl",
+  "test_dataset_id": "test_ds_jsonl",
+  "hyperparameters": {
+    "is_dp": true,
+    "noise_multiplier": 0.5,
+    "l2_norm_clip": 0.01,
+    "gradient_accumulation_steps": 32,
+    "physical_batch_size": 16,
+    "learning_rate": 0.0003,
+    "epochs": 15,
+    "use_lora": true,
+    "quantize": true,
+    "apply_lora_to_output": true,
+    "apply_lora_to_mlp": true,
+    "lora_attn_modules": [
+      "q_proj",
+      "v_proj",
+      "k_proj"
+    ],
+    "save_every_n_grad_steps": 50,
+    "eval_every_n_grad_steps": 10
+  }
+}
+Experiment: 7d791f9751ea4502fa0dbb580d8a55ef
+{
+  "sample_type": "instruct",
+  "foundation_model_name": "open_mistral_7b",
+  "train_dataset_id": "train_ds_jsonl",
+  "test_dataset_id": "test_ds_jsonl",
+  "hyperparameters": {
+    "is_dp": true,
+    "noise_multiplier": 2.0,
+    "l2_norm_clip": 0.01,
+    "gradient_accumulation_steps": 32,
+    "physical_batch_size": 16,
+    "learning_rate": 0.0003,
+    "epochs": 15,
+    "use_lora": true,
+    "quantize": true,
+    "apply_lora_to_output": true,
+    "apply_lora_to_mlp": true,
+    "lora_attn_modules": [
+      "q_proj",
+      "v_proj",
+      "k_proj"
+    ],
+    "save_every_n_grad_steps": 50,
+    "eval_every_n_grad_steps": 10
+  }
+}

@@ -23,5 +23,5 @@ def prepare_json(ds, save_dir):
 
 ds=load_dataset('sarus-tech/medical_extended',token=os.getenv('HF_TOKEN'))['train']
 ds=ds.train_test_split(train_size=9000,seed=10)
-prepare_json(ds['train'],train_data_dir)
-prepare_json(ds['test'],test_data_dir)
+prepare_json(ds['train'], train_data_dir)
+prepare_json(ds['test'], test_data_dir)

@@ -15,6 +15,14 @@ def prepare_json(ds, save_dir):
             outfile.write(json.dumps(messages) + "\n")
     return
 
+ground_truth_data_dir = os.path.join(temp_dir, "ground_truth.jsonl")
+def prepare_truth_json(ds, save_dir):
+    with open(save_dir, "w") as outfile:
+        for example in ds:
+            outfile.write(json.dumps({'drug': example['Drug'], 'disease': example['Disease']}) + "\n")
+    return
+
 ds=load_dataset('sarus-tech/medical_extended',token=os.getenv('HF_TOKEN'))['train']
-ds=ds.train_test_split(train_size=9000,seed=10)
-prepare_json(ds['test'],sample_data_dir)
+ds=ds.train_test_split(train_size=9000, seed=10)
+prepare_json(ds['test'], sample_data_dir)
+prepare_truth_json(ds['test'], ground_truth_data_dir)
