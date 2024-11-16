@@ -1,22 +1,16 @@
-from types import Any
+from typing import Any
 import os
 import httpx
 from pathlib import Path
-curr_path=Path(__file__).parent
 
 class LLMaaS:
     """A LLMaaS client"""
     def __init__(self, client: httpx.Client):
         self.client = client
-    
-    def __enter__(self):
-        return self.client.__enter__()
-    
-    def __exit__(self, type, value, traceback):
-        self.client.__exit__(type, value, traceback)
+        self.curr_path = Path(__file__).parent
 
     def upload(self, name: str, exist_ok=True) -> str:
-        path = os.path.join(curr_path, name)
+        path = os.path.join(self.curr_path, name)
         with open(path, "rb") as training_file:
             files = {"file":(name, training_file,)}
             dataset_id = name.replace('.', '_')
@@ -38,10 +32,9 @@ class LLMaaS:
         assert response.status_code==200
         return  response.json()["task_id"]
 
-    def sample(self, params):
+    def sample(self, params: Any):
         response = self.client.post(
-                f"http://localhost:8000/v1/new/sample", json=params,
-            )
-        print(response.text)
+            "http://localhost:8000/v1/new/sample", json=params,
+        )
         assert response.status_code==200
         return  response.json()["task_id"]
