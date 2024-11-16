@@ -16,37 +16,12 @@ def upload_file(client, doc_path, doc_name):
 
 def finetune(client, params):
     response = client.post(
-                    f"http://localhost:8000/v1/new/fine-tune", json=params,
+                    "http://localhost:8000/v1/new/fine-tune", json=params,
                 )
     assert response.status_code==200
     return  response.json()["task_id"]
     
-def experiments():
-    for noise_multiplier in [0.05, 1.0, 0.1, 0.2, 0.5, 2.0]:
-        hyperparameters = {
-            "is_dp": True,
-            'noise_multiplier': noise_multiplier,
-            'l2_norm_clip': 0.01,
-            "gradient_accumulation_steps": 32,
-            "physical_batch_size": 16,
-            "learning_rate": 3e-4,
-            "epochs": 15,
-            "use_lora": True,
-            "quantize": True,
-            "apply_lora_to_output": True,
-            "apply_lora_to_mlp": True,
-            "lora_attn_modules": ["q_proj","v_proj",'k_proj'],
-            "save_every_n_grad_steps": 50,
-            "eval_every_n_grad_steps": 10,
-        }
-        params = {
-            "sample_type": "instruct",
-            "foundation_model_name": "open_mistral_7b",
-            "train_dataset_id": train_ds_uuid,
-            "test_dataset_id": test_ds_uuid,
-            "hyperparameters": hyperparameters,
-        }
-        yield params
+
 
 with httpx.Client() as client:
     experiments_file=os.path.join(curr_path, 'experiments.txt')
