@@ -109,7 +109,7 @@ class Experiments:
             print(f"Sampling task: {sampling_id}")
             with open(self.curr_path / 'experiments.txt', 'a') as f:
                 json_params = json.dumps(sampling_params, indent=2)
-                f.write(f"Finetuning task: {finetuning_id}\n{json_params}\n")
+                f.write(f"Sampling task: {sampling_id}\n{json_params}\n")
 
 
 with httpx.Client() as client:

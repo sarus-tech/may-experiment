@@ -79,7 +79,7 @@ Finetuning task: ce91d45be3b2497adede4fa83fa485e4
     "eval_every_n_grad_steps": 10
   }
 }
-Finetuning task: 827b4b999b27364100e502f53b97ec16
+Sampling task: c8bbdb95a104201c100d03d48fa4fd5c
 {
   "saving_filename": "output.jsonl",
   "hyperparameters": {
@@ -90,7 +90,7 @@ Finetuning task: 827b4b999b27364100e502f53b97ec16
   "finetuning_id": "827b4b999b27364100e502f53b97ec16",
   "sample_dataset_id": "sample_jsonl"
 }
-Finetuning task: d2f2586db78fa139a3797034332b7e3a
+Sampling task: a70fb825639f61b1e567e5e082af1a69
 {
   "saving_filename": "output.jsonl",
   "hyperparameters": {
@@ -101,7 +101,7 @@ Finetuning task: d2f2586db78fa139a3797034332b7e3a
   "finetuning_id": "d2f2586db78fa139a3797034332b7e3a",
   "sample_dataset_id": "sample_jsonl"
 }
-Finetuning task: ce91d45be3b2497adede4fa83fa485e4
+Sampling task: 48305b99d6aa25276da7f9873d7d0883
 {
   "saving_filename": "output.jsonl",
   "hyperparameters": {
