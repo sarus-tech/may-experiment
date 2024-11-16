@@ -116,3 +116,4 @@ with httpx.Client() as client:
     llmaas = LLMaaS(client)
     experiments = Experiments(llmaas)
     # experiments.finetune()
+    experiments.sample()
