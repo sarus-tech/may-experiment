@@ -38,3 +38,31 @@ class LLMaaS:
         )
         assert response.status_code==200
         return  response.json()["task_id"]
+    
+    def config(self, task_id: str):
+        response = self.client.get(
+            f"http://localhost:8000/v1/task/{task_id}/config",
+        )
+        assert response.status_code==200
+        return  response.json()
+    
+    def status(self, task_id: str):
+        response = self.client.get(
+            f"http://localhost:8000/v1/task/{task_id}/status",
+        )
+        assert response.status_code==200
+        return  response.json()
+    
+    def download(self, task_id: str):
+        response = self.client.get(
+            f"http://localhost:8000/v1/task/{task_id}/download",
+        )
+        assert response.status_code==200
+        return  response.json()
+    
+with httpx.Client() as client:
+    llmaas = LLMaaS(client)
+    for task_id in ['c8bbdb95a104201c100d03d48fa4fd5c', 'a70fb825639f61b1e567e5e082af1a69', '48305b99d6aa25276da7f9873d7d0883']:
+        print(f"Task: {task_id}")
+        print(f"  Status: {llmaas.status(task_id)}")
+        print(f"  Config: {llmaas.config(task_id)}")
