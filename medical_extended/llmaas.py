@@ -68,10 +68,9 @@ class LLMaaS:
         with tarfile.open(fileobj=tar_buffer) as archive_file:
             archive_member = archive_file.getmember('output.jsonl')
             extracted_file = archive_file.extractfile(archive_member)
-        # return [json.loads(line.decode('utf-8')) for line in extracted_file.readlines()]
         for line in TextIOWrapper(extracted_file, encoding='utf-8').readlines():
             try:
-                yield json.loads(line.replace('\n', ''))
+                yield json.loads(line.replace('\n', '')) # This should actually be CSV parsing
             except Exception as e:
                 print(e)
                 print(line.replace('\n', ''))
