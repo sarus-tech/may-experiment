@@ -1,5 +1,9 @@
 from typing import Any
 import os
+from io import BytesIO, TextIOWrapper
+import gzip
+import tarfile
+import json
 import httpx
 from pathlib import Path
 
@@ -58,7 +62,19 @@ class LLMaaS:
             f"http://localhost:8000/v1/task/{task_id}/download",
         )
         assert response.status_code==200
-        return  response.json()
+        compressed_buffer = BytesIO(response.content)
+        with gzip.open(compressed_buffer, 'rb') as tar_file:
+            tar_buffer = BytesIO(tar_file.read())
+        with tarfile.open(fileobj=tar_buffer) as archive_file:
+            archive_member = archive_file.getmember('output.jsonl')
+            extracted_file = archive_file.extractfile(archive_member)
+        # return [json.loads(line.decode('utf-8')) for line in extracted_file.readlines()]
+        for line in TextIOWrapper(extracted_file, encoding='utf-8').readlines():
+            try:
+                yield json.loads(line.replace('\n', ''))
+            except Exception as e:
+                print(e)
+                print(line.replace('\n', ''))
     
 with httpx.Client() as client:
     llmaas = LLMaaS(client)
@@ -66,3 +82,5 @@ with httpx.Client() as client:
         print(f"Task: {task_id}")
         print(f"  Status: {llmaas.status(task_id)}")
         print(f"  Config: {llmaas.config(task_id)}")
+    samples = llmaas.download(task_id)
+    samples = list(samples)
