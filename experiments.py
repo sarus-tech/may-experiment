@@ -7,6 +7,8 @@ from datasets import load_dataset
 import json
 from llmaas import LLMaaS
 from pathlib import Path
+from Levenshtein import distance
+from math import exp
 
 class Experiments:
     def __init__(self, llmaas: LLMaaS, seed=10):
@@ -30,7 +32,7 @@ class Experiments:
             for example in ds['test']:
                 f.write(json.dumps({'drug': example['Drug'], 'disease': example['Disease']}) + "\n")
         # Parameter grid
-        self.noise_multipliers = [0.05, 1.0, 0.1] #, 0.2, 0.5, 2.0]
+        self.noise_multipliers = [0.01, 0.05, 0.1, 0.5, 1.0, 5.0]
 
     def prepare_dataset(self, ds, save_file):
         """Pull the dataset and dump as jsonl"""
@@ -156,6 +158,12 @@ class Experiments:
                     f.write(f"Privacy test task: {privacy_test_id}\n{json_params}\n")
         return zip(finetuning_ids, sampling_ids, privacy_test_ids)
     
+    @staticmethod
+    def privacy_risk(a: str, b: str) -> float:
+        long = max(len(a), len(b))
+        short = min(len(a), len(b))
+        return 1-(1+distance(a, b)-(long-short))/(short)
+    
     def evaluate(self):
         finetuning_sample_privacy_test_ids = self.sample()
         evaluations = Counter()
@@ -188,8 +196,8 @@ class Experiments:
                 with open(self.curr_path / 'train_ds.jsonl') as f:
                     for sample, truth in zip(self.llmaas.download_sample(privacy_test_id), f):
                         evaluations[(finetuning_id, 'privacy')] += 1
-                        if json.loads(truth)['messages'][-1]['content'] not in sample:
-                            evaluations[(finetuning_id, 'privacy_ok')] += 1
+                        truth_content = json.loads(truth)['messages'][-1]['content']
+                        evaluations[(finetuning_id, 'privacy_ok')] += 1-self.privacy_risk(truth_content, sample)
         return evaluations
 
 if __name__ == "__main__":
