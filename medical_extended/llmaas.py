@@ -84,6 +84,6 @@ if __name__ == "__main__":
             print(f"Task: {task_id}")
             print(f"  Status: {llmaas.status(task_id)}")
             print(f"  Config: {llmaas.config(task_id)}")
-        samples = llmaas.download_sammple(task_id)
+        samples = llmaas.download_sample(task_id)
         for _ in range(3):
             print(next(samples))

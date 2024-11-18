@@ -174,7 +174,7 @@ class Experiments:
                 sampling_scores = []
                 with open(self.curr_path / 'ground_truth.jsonl') as f:
                     for sample, truth in zip(self.llmaas.download_sammple(sampling_id), f):
-                        print(sample, truth)
+                        print(sample[-20:], truth[-20:])
                     
                 # # Prepare privacy test
                 # privacy_test_params = self.privacy_test_params(finetuning_id)
