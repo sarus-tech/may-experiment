@@ -1,5 +1,6 @@
 from typing import Any
 import os
+import time
 import httpx
 from datasets import load_dataset
 import json
@@ -17,10 +18,12 @@ class Experiments:
         self.prepare_dataset(ds['train'], 'train_ds.jsonl')
         self.prepare_dataset(ds['test'], 'test_ds.jsonl')
         self.prepare_sample(ds['test'], 'sample.jsonl')
+        self.prepare_privacy_test(ds['train'], 'privacy_test.jsonl')
         # Upload data
         self.train_file_id = self.llmaas.upload('train_ds.jsonl')
         self.test_file_id = self.llmaas.upload('test_ds.jsonl')
         self.sample_file_id = self.llmaas.upload('sample.jsonl')
+        self.privacy_test_file_id = self.llmaas.upload('privacy_test.jsonl')
         # Ground truth
         with open(self.curr_path / 'ground_truth.jsonl', 'w') as f:
             for example in ds['test']:
@@ -41,7 +44,18 @@ class Experiments:
                 f.write(json.dumps(messages) + "\n")
     
     def prepare_sample(self, ds, save_file):
-        """Pull the dataset and dump as jsonl"""
+        """To test if the model can predict well the output"""
+        with open(self.curr_path / save_file, "w") as f:
+            for example in ds:
+                messages = {
+                    "messages": [
+                        {"role": "user", "content": example["question"]},
+                    ]
+                }
+                f.write(json.dumps(messages) + "\n")
+        
+    def prepare_privacy_test(self, ds, save_file):
+        """To test if the model outputs some of the training set"""
         with open(self.curr_path / save_file, "w") as f:
             for example in ds:
                 messages = {
@@ -80,13 +94,26 @@ class Experiments:
         hyperparameters = {
             "max_length": 300,
             "batch_size": 100,
-            "temperature": 1.0,
+            "temperature": 0.1,
         }
         return {
-            "saving_filename": "output.jsonl",
+            "saving_filename": "output.csv",
             "hyperparameters": hyperparameters,
             "finetuning_id": finetuning_id,
             "sample_dataset_id": self.sample_file_id,
+        }
+    
+    def privacy_test_params(self, finetuning_id: str) -> Any:
+        hyperparameters = {
+            "max_length": 300,
+            "batch_size": 100,
+            "temperature": 0.1,
+        }
+        return {
+            "saving_filename": "output.csv",
+            "hyperparameters": hyperparameters,
+            "finetuning_id": finetuning_id,
+            "sample_dataset_id": self.privacy_test_file_id,
         }
         
     def finetune(self) -> list[str]:
@@ -103,17 +130,59 @@ class Experiments:
     
     def sample(self):
         finetuning_ids = self.finetune()
+        sampling_ids = []
+        privacy_test_ids = []
         for finetuning_id in finetuning_ids:
-            sampling_params = self.sampling_params(finetuning_id)
-            sampling_id = self.llmaas.sample(sampling_params)
-            print(f"Sampling task: {sampling_id}")
-            with open(self.curr_path / 'experiments.txt', 'a') as f:
-                json_params = json.dumps(sampling_params, indent=2)
-                f.write(f"Sampling task: {sampling_id}\n{json_params}\n")
+            while not self.llmaas.status(finetuning_id) == 'SUCCESS':
+                print(f"Status of finetuning {finetuning_id} is {self.llmaas.status(finetuning_id)}")
+                time.sleep(60)
+            if self.llmaas.status(finetuning_id) == 'SUCCESS':
+                # Simple sampling
+                sampling_params = self.sampling_params(finetuning_id)
+                sampling_id = self.llmaas.sample(sampling_params)
+                sampling_ids.append(sampling_id)
+                print(f"Sampling task: {sampling_id}")
+                with open(self.curr_path / 'experiments.txt', 'a') as f:
+                    json_params = json.dumps(sampling_params, indent=2)
+                    f.write(f"Sampling task: {sampling_id}\n{json_params}\n")
+                # Prepare privacy test
+                privacy_test_params = self.privacy_test_params(finetuning_id)
+                privacy_test_id = self.llmaas.sample(privacy_test_params)
+                privacy_test_ids.append(privacy_test_id)
+                print(f"Privacy test task: {privacy_test_id}")
+                with open(self.curr_path / 'experiments.txt', 'a') as f:
+                    json_params = json.dumps(privacy_test_params, indent=2)
+                    f.write(f"Privacy test task: {privacy_test_id}\n{json_params}\n")
+        return zip(finetuning_ids, sampling_ids, privacy_test_ids)
+    
+    def evaluate(self):
+        finetuning_sample_privacy_test_ids = self.sample()
+        for finetuning_id, sample_id, privacy_test_id in finetuning_sample_privacy_test_ids:
+            while not self.llmaas.status(finetuning_id) == 'SUCCESS':
+                print(f"Status of finetuning {finetuning_id} is {self.llmaas.status(finetuning_id)}")
+                time.sleep(60)
+            while not self.llmaas.status(sample_id) == 'SUCCESS':
+                print(f"Status of sampling {sample_id} is {self.llmaas.status(sample_id)}")
+                time.sleep(60)
+            while not self.llmaas.status(finetuning_id) == 'SUCCESS':
+                print(f"Status of privacy test {privacy_test_id} is {self.llmaas.status(privacy_test_id)}")
+                time.sleep(60)
+            if self.llmaas.status(finetuning_id) == 'SUCCESS' and self.llmaas.status(sample_id) == 'SUCCESS' and self.llmaas.status(privacy_test_id) == 'SUCCESS':
+                # Simple sampling
+                sampling_params = self.sampling_params(finetuning_id)
+                sampling_id = self.llmaas.sample(sampling_params)
+                sampling_scores = []
+                with open(self.curr_path / 'ground_truth.jsonl') as f:
+                    for sample, truth in zip(self.llmaas.download_sammple(sampling_id), f):
+                        print(sample, truth)
+                    
+                # # Prepare privacy test
+                # privacy_test_params = self.privacy_test_params(finetuning_id)
+                # privacy_test_id = self.llmaas.sample(privacy_test_params)
+                # privacy_test_scores = []
 
-
-with httpx.Client() as client:
-    llmaas = LLMaaS(client)
-    experiments = Experiments(llmaas)
-    # experiments.finetune()
-    experiments.sample()
+if __name__ == "__main__":
+    with httpx.Client() as client:
+        llmaas = LLMaaS(client)
+        experiments = Experiments(llmaas)
+        experiments.evaluate()
