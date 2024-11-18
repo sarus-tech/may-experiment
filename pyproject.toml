@@ -16,5 +16,6 @@ dependencies = [
     "httpx",
     "datasets",
     "setuptools",
+    "levenshtein>=0.26.1",
 ]
 dynamic = ["version"]

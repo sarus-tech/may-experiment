@@ -58,7 +58,7 @@ class LLMaaS:
         assert response.status_code==200
         return  response.json()['status']
     
-    def download_sammple(self, task_id: str):
+    def download_sample(self, task_id: str):
         response = self.client.get(
             f"http://localhost:8000/v1/task/{task_id}/download",
         )
@@ -69,7 +69,9 @@ class LLMaaS:
         with tarfile.open(fileobj=tar_buffer) as archive_file:
             archive_member = archive_file.getmember('output.csv')
             extracted_file = archive_file.extractfile(archive_member)
-        for line in csv.reader(TextIOWrapper(extracted_file, encoding='utf-8')):
+        csv_reader = csv.reader(TextIOWrapper(extracted_file, encoding='utf-8'))
+        next(csv_reader)
+        for line in csv_reader:
             try:
                 yield line[0]
             except Exception as e:

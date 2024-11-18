@@ -174,22 +174,33 @@ class Experiments:
                 sampling_params = self.sampling_params(finetuning_id)
                 sampling_id = self.llmaas.sample(sampling_params)
                 with open(self.curr_path / 'ground_truth.jsonl') as f:
-                    for sample, truth in zip(self.llmaas.download_sammple(sampling_id), f):
+                    for sample, truth in zip(self.llmaas.download_sample(sampling_id), f):
+                        truth = json.loads(truth)
                         evaluations[(finetuning_id, 'disease')] += 1
-                        if truth['disease'] in sample:
+                        if truth['disease'].lower() in sample.lower():
                             evaluations[(finetuning_id, 'disease_ok')] += 1
                         evaluations[(finetuning_id, 'drug')] += 1
-                        if truth['drug'] in sample:
+                        if truth['drug'].lower() in sample.lower():
                             evaluations[(finetuning_id, 'drug_ok')] += 1
-                        print(evaluations)
-                    
-                # # Prepare privacy test
-                # privacy_test_params = self.privacy_test_params(finetuning_id)
-                # privacy_test_id = self.llmaas.sample(privacy_test_params)
-                # privacy_test_scores = []
+                # Privacy evaluation
+                privacy_test_params = self.privacy_test_params(finetuning_id)
+                privacy_test_id = self.llmaas.sample(privacy_test_params)
+                with open(self.curr_path / 'train_ds.jsonl') as f:
+                    for sample, truth in zip(self.llmaas.download_sample(privacy_test_id), f):
+                        evaluations[(finetuning_id, 'privacy')] += 1
+                        if json.loads(truth)['messages'][-1]['content'] not in sample:
+                            evaluations[(finetuning_id, 'privacy_ok')] += 1
+        return evaluations
 
 if __name__ == "__main__":
     with httpx.Client() as client:
         llmaas = LLMaaS(client)
         experiments = Experiments(llmaas)
-        experiments.evaluate()
+        evaluations = experiments.evaluate()
+        for finetuning_id in experiments.finetune():
+            print(f"""Model {finetuning_id}:
+  Disease accuracy: {(1+evaluations[(finetuning_id, 'disease_ok')])/(1+evaluations[(finetuning_id, 'disease')])}
+  Drug accuracy: {(1+evaluations[(finetuning_id, 'drug_ok')])/(1+evaluations[(finetuning_id, 'drug')])}
+  Privacy protection: {(1+evaluations[(finetuning_id, 'privacy_ok')])/(1+evaluations[(finetuning_id, 'privacy')])}
+""")
+        
