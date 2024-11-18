@@ -1,6 +1,7 @@
 from typing import Any
 import os
 import time
+from collections import Counter
 import httpx
 from datasets import load_dataset
 import json
@@ -157,6 +158,7 @@ class Experiments:
     
     def evaluate(self):
         finetuning_sample_privacy_test_ids = self.sample()
+        evaluations = Counter()
         for finetuning_id, sample_id, privacy_test_id in finetuning_sample_privacy_test_ids:
             while not self.llmaas.status(finetuning_id) == 'SUCCESS':
                 print(f"Status of finetuning {finetuning_id} is {self.llmaas.status(finetuning_id)}")
@@ -171,10 +173,15 @@ class Experiments:
                 # Simple sampling
                 sampling_params = self.sampling_params(finetuning_id)
                 sampling_id = self.llmaas.sample(sampling_params)
-                sampling_scores = []
                 with open(self.curr_path / 'ground_truth.jsonl') as f:
                     for sample, truth in zip(self.llmaas.download_sammple(sampling_id), f):
-                        print(sample[-20:], truth[-20:])
+                        evaluations[(finetuning_id, 'disease')] += 1
+                        if truth['disease'] in sample:
+                            evaluations[(finetuning_id, 'disease_ok')] += 1
+                        evaluations[(finetuning_id, 'drug')] += 1
+                        if truth['drug'] in sample:
+                            evaluations[(finetuning_id, 'drug_ok')] += 1
+                        print(evaluations)
                     
                 # # Prepare privacy test
                 # privacy_test_params = self.privacy_test_params(finetuning_id)
