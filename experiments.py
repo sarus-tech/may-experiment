@@ -35,7 +35,7 @@ class Experiments:
                 f.write(json.dumps({'drug': example['Drug'], 'disease': example['Disease']}) + "\n")
         # Parameter grid
         # self.noise_multipliers = [0.01, 0.05, 0.1, 0.5, 1.0, 5.0]
-        self.noise_multipliers = [0.01, 0.05, 0.1, 0.5, 1.0, 5.0]
+        self.noise_multipliers = [0.1, 0.2]
         
 
     def prepare_dataset(self, ds, save_file):
@@ -72,22 +72,22 @@ class Experiments:
                 }
                 f.write(json.dumps(messages) + "\n")
     
-    def finetuning_params(self, is_dp: bool=True, noise_multiplier: float=1.0, l2_norm_clip: float=0.01, learning_rate: float=3e-4, epochs: int=15) -> Any:
+    def finetuning_params(self, is_dp: bool=True, noise_multiplier: float=1.0, l2_norm_clip: float=0.01, learning_rate: float=5e-4, epochs: int=25) -> Any:
         hyperparameters = {
                 "is_dp": is_dp,
                 "noise_multiplier": noise_multiplier,
                 "l2_norm_clip": l2_norm_clip,
-                "gradient_accumulation_steps": 32,
+                "gradient_accumulation_steps": 128,
                 "physical_batch_size": 16,
                 "learning_rate": learning_rate,
-                "epochs": 15,
+                "epochs": epochs,
                 "use_lora": True,
                 "quantize": True,
                 "apply_lora_to_output": True,
                 "apply_lora_to_mlp": True,
                 "lora_attn_modules": ["q_proj","v_proj","k_proj"],
-                "save_every_n_grad_steps": 50,
-                "eval_every_n_grad_steps": 10,
+                "save_every_n_grad_steps": 20,
+                "eval_every_n_grad_steps": 5,
             }
         return {
             "sample_type": "instruct",
