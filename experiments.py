@@ -35,7 +35,7 @@ class Experiments:
                 f.write(json.dumps({'drug': example['Drug'], 'disease': example['Disease']}) + "\n")
         # Parameter grid
         # self.noise_multipliers = [0.01, 0.05, 0.1, 0.5, 1.0, 5.0]
-        self.noise_multipliers = [0.05, 0.1, 1.0]
+        self.noise_multipliers = [0.01, 0.05, 0.1, 0.5, 1.0, 5.0]
         
 
     def prepare_dataset(self, ds, save_file):
@@ -184,7 +184,7 @@ class Experiments:
             while not self.llmaas.status(sample_id) == 'SUCCESS':
                 print(f"Status of sampling {sample_id} is {self.llmaas.status(sample_id)}")
                 time.sleep(60)
-            while not self.llmaas.status(finetuning_id) == 'SUCCESS':
+            while not self.llmaas.status(privacy_test_id) == 'SUCCESS':
                 print(f"Status of privacy test {privacy_test_id} is {self.llmaas.status(privacy_test_id)}")
                 time.sleep(60)
             if self.llmaas.status(finetuning_id) == 'SUCCESS' and self.llmaas.status(sample_id) == 'SUCCESS' and self.llmaas.status(privacy_test_id) == 'SUCCESS':
