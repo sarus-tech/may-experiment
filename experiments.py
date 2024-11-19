@@ -1,14 +1,16 @@
 from typing import Any
 import os
 import time
-from collections import Counter
-import httpx
-from datasets import load_dataset
-import json
-from llmaas import LLMaaS
-from pathlib import Path
-from Levenshtein import distance
 from math import exp
+from collections import Counter
+from pathlib import Path
+from difflib import SequenceMatcher
+import httpx
+import json
+from datasets import load_dataset
+from Levenshtein import distance
+from llmaas import LLMaaS
+
 
 class Experiments:
     def __init__(self, llmaas: LLMaaS, seed=10):
@@ -161,10 +163,16 @@ class Experiments:
         return zip(finetuning_ids, sampling_ids, privacy_test_ids)
     
     @staticmethod
-    def privacy_risk(a: str, b: str) -> float:
+    def privacy_risk_levenshtein(a: str, b: str) -> float:
         long = max(len(a), len(b))
         short = min(len(a), len(b))
-        return 1-(1+distance(a, b)-(long-short))/(short)
+        return 1-(1+distance(a, b)-(long-short))/(1+short)
+    
+    @staticmethod
+    def privacy_risk(a: str, b: str) -> float:
+        short = min(len(a), len(b))
+        match = SequenceMatcher(None, a, b).find_longest_match(0, len(a), 0, len(b))
+        return 1 if match.size > short//10 else 0
     
     def evaluate(self):
         finetuning_sample_privacy_test_ids = self.sample()
