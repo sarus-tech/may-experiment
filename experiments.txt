@@ -1,0 +1,54 @@
+Finetuning task: 975828440bb9457df0a22cf0144f4b2d
+{
+  "sample_type": "instruct",
+  "foundation_model_name": "open_mistral_7b",
+  "train_dataset_id": "train_ds_jsonl",
+  "test_dataset_id": "test_ds_jsonl",
+  "hyperparameters": {
+    "is_dp": true,
+    "noise_multiplier": 0.1,
+    "l2_norm_clip": 0.01,
+    "gradient_accumulation_steps": 128,
+    "physical_batch_size": 16,
+    "learning_rate": 0.0005,
+    "epochs": 25,
+    "use_lora": true,
+    "quantize": true,
+    "apply_lora_to_output": true,
+    "apply_lora_to_mlp": true,
+    "lora_attn_modules": [
+      "q_proj",
+      "v_proj",
+      "k_proj"
+    ],
+    "save_every_n_grad_steps": 20,
+    "eval_every_n_grad_steps": 5
+  }
+}
+Finetuning task: 5fdef41c173dea35e960b94632849039
+{
+  "sample_type": "instruct",
+  "foundation_model_name": "open_mistral_7b",
+  "train_dataset_id": "train_ds_jsonl",
+  "test_dataset_id": "test_ds_jsonl",
+  "hyperparameters": {
+    "is_dp": true,
+    "noise_multiplier": 0.2,
+    "l2_norm_clip": 0.01,
+    "gradient_accumulation_steps": 128,
+    "physical_batch_size": 16,
+    "learning_rate": 0.0005,
+    "epochs": 25,
+    "use_lora": true,
+    "quantize": true,
+    "apply_lora_to_output": true,
+    "apply_lora_to_mlp": true,
+    "lora_attn_modules": [
+      "q_proj",
+      "v_proj",
+      "k_proj"
+    ],
+    "save_every_n_grad_steps": 20,
+    "eval_every_n_grad_steps": 5
+  }
+}
