@@ -35,7 +35,7 @@ class Experiments:
                 f.write(json.dumps({'drug': example['Drug'], 'disease': example['Disease']}) + "\n")
         # Parameter grid
         # self.noise_multipliers = [0.01, 0.05, 0.1, 0.5, 1.0, 5.0]
-        self.noise_multipliers = [0.1, 0.2]
+        self.noise_multipliers = [0.1, 0.2, 0.3]
         
 
     def prepare_dataset(self, ds, save_file):
@@ -71,6 +71,21 @@ class Experiments:
                     ]
                 }
                 f.write(json.dumps(messages) + "\n")
+    
+    def log(self, task_id: str, task_type: str, data: Any):
+        """Log experiments"""
+        logs = dict()
+        try:
+            with open(self.curr_path / 'experiments.json', 'r') as f:
+                logs = json.load(f)
+        except Exception:
+            print("Could not read the experiment logs")
+        logs[task_id] = {'type': task_type, 'data': data}
+        try:
+            with open(self.curr_path / 'experiments.json', 'w') as f:
+                json.dump(logs, f, indent=2)
+        except Exception:
+            print("Could not update the experiment logs")
     
     def finetuning_params(self, is_dp: bool=True, noise_multiplier: float=1.0, l2_norm_clip: float=0.01, learning_rate: float=5e-4, epochs: int=25) -> Any:
         hyperparameters = {
@@ -130,9 +145,7 @@ class Experiments:
             finetuning_id = self.llmaas.finetune(params=finetuning_params)
             finetuning_ids.append(finetuning_id)
             print(f"Finetuning task: {finetuning_id}")
-            with open(self.curr_path / 'experiments.txt', 'a') as f:
-                json_params = json.dumps(finetuning_params, indent=2)
-                f.write(f"Finetuning task: {finetuning_id}\n{json_params}\n")
+            self.log(finetuning_id, 'finetuning', finetuning_params)
         return finetuning_ids
     
     def sample(self):
@@ -149,17 +162,13 @@ class Experiments:
                 sampling_id = self.llmaas.sample(sampling_params)
                 sampling_ids.append(sampling_id)
                 print(f"Sampling task: {sampling_id}")
-                with open(self.curr_path / 'experiments.txt', 'a') as f:
-                    json_params = json.dumps(sampling_params, indent=2)
-                    f.write(f"Sampling task: {sampling_id}\n{json_params}\n")
+                self.log(sampling_id, 'sampling', sampling_params)
                 # Prepare privacy test
                 privacy_test_params = self.privacy_test_params(finetuning_id)
                 privacy_test_id = self.llmaas.sample(privacy_test_params)
                 privacy_test_ids.append(privacy_test_id)
                 print(f"Privacy test task: {privacy_test_id}")
-                with open(self.curr_path / 'experiments.txt', 'a') as f:
-                    json_params = json.dumps(privacy_test_params, indent=2)
-                    f.write(f"Privacy test task: {privacy_test_id}\n{json_params}\n")
+                self.log(privacy_test_id, 'privacy_test', privacy_test_params)
         return zip(finetuning_ids, sampling_ids, privacy_test_ids)
     
     @staticmethod
