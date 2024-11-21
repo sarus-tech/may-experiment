@@ -35,7 +35,7 @@ class Experiments:
                 f.write(json.dumps({'drug': example['Drug'], 'disease': example['Disease']}) + "\n")
         # Parameter grid
         # self.noise_multipliers = [0.01, 0.05, 0.1, 0.5, 1.0, 5.0]
-        self.noise_multipliers = [0.1, 0.2, 0.3]
+        self.noise_multipliers = [0.1, 0.2, 0.3, 0.4]
         
 
     def prepare_dataset(self, ds, save_file):
