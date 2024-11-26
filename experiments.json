@@ -192,5 +192,31 @@
       "finetuning_id": "de48b0fef89e569b905f39b4e10a1f85",
       "sample_dataset_id": "privacy_test_jsonl"
     }
+  },
+  "a90377b78a0dfc14393d1536a0bccaaa": {
+    "type": "sampling",
+    "data": {
+      "saving_filename": "output.csv",
+      "hyperparameters": {
+        "max_length": 300,
+        "batch_size": 100,
+        "temperature": 0.1
+      },
+      "finetuning_id": "6c1aabfaa9905f56284750a80c2f0572",
+      "sample_dataset_id": "sample_jsonl"
+    }
+  },
+  "4f83422aca7503da00a55c9a290339ad": {
+    "type": "privacy_test",
+    "data": {
+      "saving_filename": "output.csv",
+      "hyperparameters": {
+        "max_length": 300,
+        "batch_size": 100,
+        "temperature": 0.1
+      },
+      "finetuning_id": "6c1aabfaa9905f56284750a80c2f0572",
+      "sample_dataset_id": "privacy_test_jsonl"
+    }
   }
 }
