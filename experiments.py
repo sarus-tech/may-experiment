@@ -183,6 +183,7 @@ class Experiments:
         match = SequenceMatcher(None, a, b).find_longest_match(0, len(a), 0, len(b))
         return 1 if match.size > short//10 else 0
     
+    # TODO Add frequent disease
     def evaluate(self):
         finetuning_sample_privacy_test_ids = self.sample()
         evaluations = Counter()
