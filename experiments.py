@@ -11,6 +11,28 @@ from datasets import load_dataset
 from Levenshtein import distance
 from llmaas import LLMaaS
 
+class Evaluator:
+    def __init__(self):
+        self.counter = Counter()
+        
+    def accuracy(self, experiment_id: int, noise_multiplier: float, disease: str, disease_ok: bool, drug_ok: bool):
+        self.counter[f'/{experiment_id}/{noise_multiplier}/*'] += 1
+        self.counter[f'/{experiment_id}/{noise_multiplier}/accuracy/*/disease'] += 1 if disease_ok else 0
+        self.counter[f'/{experiment_id}/{noise_multiplier}/accuracy/*/drug'] += 1 if drug_ok else 0
+        self.counter[f'/{experiment_id}/{noise_multiplier}/accuracy/*/disease+drug'] += 1 if disease_ok and drug_ok else 0
+        self.counter[f'/{experiment_id}/{noise_multiplier}/accuracy/{disease}'] += 1
+        self.counter[f'/{experiment_id}/{noise_multiplier}/accuracy/{disease}/disease'] += 1 if disease_ok else 0
+        self.counter[f'/{experiment_id}/{noise_multiplier}/accuracy/{disease}/drug'] += 1 if drug_ok else 0
+        self.counter[f'/{experiment_id}/{noise_multiplier}/accuracy/{disease}/disease+drug'] += 1 if disease_ok and drug_ok else 0
+    
+    def privacy(self, experiment_id: int, noise_multiplier: float, risk: float, breach: bool):
+        self.counter[f'/{experiment_id}/{noise_multiplier}/privacy'] += 1
+        self.counter[f'/{experiment_id}/{noise_multiplier}/privacy/risk'] += risk
+        self.counter[f'/{experiment_id}/{noise_multiplier}/privacy/breach'] += 1 if breach else 0
+    
+    def dump(self):
+        os.makedirs('out', exist_ok=True)
+        with open()
 
 class Experiments:
     def __init__(self, llmaas: LLMaaS, seed=10):
@@ -204,7 +226,7 @@ class Experiments:
                 with open(self.curr_path / 'ground_truth.jsonl') as f:
                     for sample, truth in zip(self.llmaas.download_sample(sampling_id), f):
                         truth = json.loads(truth)
-                        evaluations[(finetuning_id, 'disease')] += 1
+                        evaluations[f'{finetuning_id}, 'disease')] += 1
                         if truth['disease'].lower() in sample.lower():
                             evaluations[(finetuning_id, 'disease_ok')] += 1
                         evaluations[(finetuning_id, 'drug')] += 1
