@@ -1,7 +1,6 @@
 from typing import Any
 import os
 import time
-from math import exp
 from collections import Counter
 from pathlib import Path
 from difflib import SequenceMatcher
@@ -16,23 +15,28 @@ class Evaluator:
         self.counter = Counter()
         
     def accuracy(self, experiment_id: int, noise_multiplier: float, disease: str, disease_ok: bool, drug_ok: bool):
-        self.counter[f'/{experiment_id}/{noise_multiplier}/*'] += 1
-        self.counter[f'/{experiment_id}/{noise_multiplier}/accuracy/*/disease'] += 1 if disease_ok else 0
-        self.counter[f'/{experiment_id}/{noise_multiplier}/accuracy/*/drug'] += 1 if drug_ok else 0
-        self.counter[f'/{experiment_id}/{noise_multiplier}/accuracy/*/disease+drug'] += 1 if disease_ok and drug_ok else 0
-        self.counter[f'/{experiment_id}/{noise_multiplier}/accuracy/{disease}'] += 1
-        self.counter[f'/{experiment_id}/{noise_multiplier}/accuracy/{disease}/disease'] += 1 if disease_ok else 0
-        self.counter[f'/{experiment_id}/{noise_multiplier}/accuracy/{disease}/drug'] += 1 if drug_ok else 0
-        self.counter[f'/{experiment_id}/{noise_multiplier}/accuracy/{disease}/disease+drug'] += 1 if disease_ok and drug_ok else 0
+        self.counter[json.dumps(('*', '*', '*'))] += 1
+        self.counter[json.dumps(('*', '*', 'accuracy'))] += 1
+        self.counter[json.dumps((experiment_id, noise_multiplier, 'accuracy', '*'))] += 1
+        self.counter[json.dumps((experiment_id, noise_multiplier, 'accuracy', '*', 'disease'))] += 1 if disease_ok else 0
+        self.counter[json.dumps((experiment_id, noise_multiplier, 'accuracy', '*', 'drug'))] += 1 if drug_ok else 0
+        self.counter[json.dumps((experiment_id, noise_multiplier, 'accuracy', '*', 'disease+drug'))] += 1 if disease_ok and drug_ok else 0
+        self.counter[json.dumps((experiment_id, noise_multiplier, 'accuracy', disease))] += 1
+        self.counter[json.dumps((experiment_id, noise_multiplier, 'accuracy', disease, 'disease'))] += 1 if disease_ok else 0
+        self.counter[json.dumps((experiment_id, noise_multiplier, 'accuracy', disease, 'drug'))] += 1 if drug_ok else 0
+        self.counter[json.dumps((experiment_id, noise_multiplier, 'accuracy', disease, 'disease+drug'))] += 1 if disease_ok and drug_ok else 0
     
     def privacy(self, experiment_id: int, noise_multiplier: float, risk: float, breach: bool):
-        self.counter[f'/{experiment_id}/{noise_multiplier}/privacy'] += 1
-        self.counter[f'/{experiment_id}/{noise_multiplier}/privacy/risk'] += risk
-        self.counter[f'/{experiment_id}/{noise_multiplier}/privacy/breach'] += 1 if breach else 0
+        self.counter[json.dumps(('*', '*', '*'))] += 1
+        self.counter[json.dumps(('*', '*', 'privacy'))] += 1
+        self.counter[json.dumps((experiment_id, noise_multiplier, 'privacy'))] += 1
+        self.counter[json.dumps((experiment_id, noise_multiplier, 'privacy', 'risk'))] += risk
+        self.counter[json.dumps((experiment_id, noise_multiplier, 'privacy', 'breach'))] += 1 if breach else 0
     
     def dump(self):
-        os.makedirs('out', exist_ok=True)
-        with open()
+        os.makedirs('results', exist_ok=True)
+        with open(f"results/evaluation_on_{self.counter[json.dumps(('*', '*', '*'))]}_events.json", 'w') as f:
+            json.dump(self.counter, f, indent=2)
 
 class Experiments:
     def __init__(self, llmaas: LLMaaS, seed=10):
@@ -201,14 +205,15 @@ class Experiments:
     
     @staticmethod
     def privacy_risk(a: str, b: str) -> float:
+        epsilon = 1e-6
         short = min(len(a), len(b))
         match = SequenceMatcher(None, a, b).find_longest_match(0, len(a), 0, len(b))
-        return 1 if match.size > short//10 else 0
+        return match.size/(epsilon+short)
     
     # TODO Add frequent disease
     def evaluate(self):
         finetuning_sample_privacy_test_ids = self.sample()
-        evaluations = Counter()
+        evaluator = Evaluator()
         for finetuning_id, sample_id, privacy_test_id in finetuning_sample_privacy_test_ids:
             while not self.llmaas.status(finetuning_id) == 'SUCCESS':
                 print(f"Status of finetuning {finetuning_id} is {self.llmaas.status(finetuning_id)}")
@@ -225,32 +230,43 @@ class Experiments:
                 sampling_id = self.llmaas.sample(sampling_params)
                 with open(self.curr_path / 'ground_truth.jsonl') as f:
                     for sample, truth in zip(self.llmaas.download_sample(sampling_id), f):
-                        truth = json.loads(truth)
-                        evaluations[f'{finetuning_id}, 'disease')] += 1
-                        if truth['disease'].lower() in sample.lower():
-                            evaluations[(finetuning_id, 'disease_ok')] += 1
-                        evaluations[(finetuning_id, 'drug')] += 1
-                        if truth['drug'].lower() in sample.lower():
-                            evaluations[(finetuning_id, 'drug_ok')] += 1
+                        truth_content = json.loads(truth)
+                        disease_lc = truth_content['disease'].lower()
+                        drug_lc = truth_content['drug'].lower()
+                        sample_lc = sample.lower()
+                        evaluator.accuracy(
+                            finetuning_id,
+                            self.llmaas.config(finetuning_id)['params']['hyperparameters']['noise_multiplier'],
+                            disease_lc,
+                            disease_lc in sample_lc,
+                            drug_lc in sample_lc,
+                        )
                 # Privacy evaluation
                 privacy_test_params = self.privacy_test_params(finetuning_id)
                 privacy_test_id = self.llmaas.sample(privacy_test_params)
                 with open(self.curr_path / 'train_ds.jsonl') as f:
                     for sample, truth in zip(self.llmaas.download_sample(privacy_test_id), f):
-                        evaluations[(finetuning_id, 'privacy')] += 1
                         truth_content = json.loads(truth)['messages'][-1]['content']
-                        evaluations[(finetuning_id, 'privacy_ok')] += 1-self.privacy_risk(truth_content, sample)
-        return evaluations
+                        risk = self.privacy_risk(truth_content, sample)
+                        evaluator.privacy(
+                            finetuning_id,
+                            self.llmaas.config(finetuning_id)['params']['hyperparameters']['noise_multiplier'],
+                            risk,
+                            risk>0.3,
+                        )
+            evaluator.dump()
+        return evaluator.counter
 
 if __name__ == "__main__":
     with httpx.Client() as client:
         llmaas = LLMaaS(client)
         experiments = Experiments(llmaas)
         evaluations = experiments.evaluate()
-        for finetuning_id in experiments.finetune():
-            print(f"""Model {finetuning_id}:
-  Disease accuracy: {(1+evaluations[(finetuning_id, 'disease_ok')])/(1+evaluations[(finetuning_id, 'disease')])}
-  Drug accuracy: {(1+evaluations[(finetuning_id, 'drug_ok')])/(1+evaluations[(finetuning_id, 'drug')])}
-  Privacy protection: {(1+evaluations[(finetuning_id, 'privacy_ok')])/(1+evaluations[(finetuning_id, 'privacy')])}
-""")
+        print(evaluations)
+#         for finetuning_id in experiments.finetune():
+#             print(f"""Model {finetuning_id}:
+#   Disease accuracy: {(1+evaluations[(finetuning_id, 'disease_ok')])/(1+evaluations[(finetuning_id, 'disease')])}
+#   Drug accuracy: {(1+evaluations[(finetuning_id, 'drug_ok')])/(1+evaluations[(finetuning_id, 'drug')])}
+#   Privacy protection: {(1+evaluations[(finetuning_id, 'privacy_ok')])/(1+evaluations[(finetuning_id, 'privacy')])}
+# """)
         
