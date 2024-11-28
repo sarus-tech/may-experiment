@@ -17,6 +17,7 @@ dependencies = [
     "datasets",
     "setuptools",
     "levenshtein>=0.26.1",
+    "termcolor>=2.5.0",
 ]
 dynamic = ["version"]
 

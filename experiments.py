@@ -59,6 +59,18 @@ class Experiments:
         with open(self.curr_path / 'ground_truth.jsonl', 'w') as f:
             for example in ds['test']:
                 f.write(json.dumps({'drug': example['Drug'], 'disease': example['Disease']}) + "\n")
+        # Train set frequency
+        with open(self.curr_path / 'train_counts.json', 'w') as f:
+            counts = Counter()
+            for example in ds['train']:
+                counts[example['Disease']] += 1
+            json.dump(counts, f, indent=2)
+        # Test set frequency
+        with open(self.curr_path / 'test_counts.json', 'w') as f:
+            counts = Counter()
+            for example in ds['test']:
+                counts[example['Disease']] += 1
+            json.dump(counts, f, indent=2)
         # Parameter grid
         # self.noise_multipliers = [0.01, 0.05, 0.1, 0.5, 1.0, 5.0]
         self.noise_multipliers = [0.1, 0.2, 0.3, 0.4]
