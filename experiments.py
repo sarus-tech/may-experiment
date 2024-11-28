@@ -61,7 +61,14 @@ class Experiments:
                 f.write(json.dumps({'drug': example['Drug'], 'disease': example['Disease']}) + "\n")
         # Parameter grid
         # self.noise_multipliers = [0.01, 0.05, 0.1, 0.5, 1.0, 5.0]
-        self.noise_multipliers = [0.1, 0.2, 0.3, 0.4]
+        self.parameters = [
+                (False, 0, 0.01, 5e-5, 25),
+                (True, 0.1, 0.01, 5e-4, 25),
+                (True, 0.2, 0.01, 5e-4, 25),
+                (True, 0.3, 0.01, 5e-4, 25),
+                (True, 0.4, 0.01, 5e-4, 25),
+                (True, 0.5, 0.01, 5e-4, 25),
+            ]
         
 
     def prepare_dataset(self, ds, save_file):
@@ -115,21 +122,21 @@ class Experiments:
     
     def finetuning_params(self, is_dp: bool=True, noise_multiplier: float=1.0, l2_norm_clip: float=0.01, learning_rate: float=5e-4, epochs: int=25) -> Any:
         hyperparameters = {
-                "is_dp": is_dp,
-                "noise_multiplier": noise_multiplier,
-                "l2_norm_clip": l2_norm_clip,
-                "gradient_accumulation_steps": 128,
-                "physical_batch_size": 16,
-                "learning_rate": learning_rate,
-                "epochs": epochs,
-                "use_lora": True,
-                "quantize": True,
-                "apply_lora_to_output": True,
-                "apply_lora_to_mlp": True,
-                "lora_attn_modules": ["q_proj","v_proj","k_proj"],
-                "save_every_n_grad_steps": 20,
-                "eval_every_n_grad_steps": 5,
-            }
+            "is_dp": is_dp,
+            "noise_multiplier": noise_multiplier,
+            "l2_norm_clip": l2_norm_clip,
+            "gradient_accumulation_steps": 128,
+            "physical_batch_size": 16,
+            "learning_rate": learning_rate,
+            "epochs": epochs,
+            "use_lora": True,
+            "quantize": True,
+            "apply_lora_to_output": True,
+            "apply_lora_to_mlp": True,
+            "lora_attn_modules": ["q_proj","v_proj","k_proj"],
+            "save_every_n_grad_steps": 20,
+            "eval_every_n_grad_steps": 5,
+        }
         return {
             "sample_type": "instruct",
             "foundation_model_name": "open_mistral_7b",
@@ -166,8 +173,8 @@ class Experiments:
         
     def finetune(self) -> list[str]:
         finetuning_ids = []
-        for noise_multiplier in self.noise_multipliers:
-            finetuning_params = self.finetuning_params(noise_multiplier=noise_multiplier)
+        for is_dp, noise_multiplier, l2_norm_clip, learning_rate, epochs in self.parameters:
+            finetuning_params = self.finetuning_params(is_dp, noise_multiplier, l2_norm_clip, learning_rate, epochs)
             finetuning_id = self.llmaas.finetune(params=finetuning_params)
             finetuning_ids.append(finetuning_id)
             print(f"Finetuning task: {finetuning_id}")
@@ -210,7 +217,6 @@ class Experiments:
         match = SequenceMatcher(None, a, b).find_longest_match(0, len(a), 0, len(b))
         return match.size/(epsilon+short)
     
-    # TODO Add frequent disease
     def evaluate(self):
         finetuning_sample_privacy_test_ids = self.sample()
         evaluator = Evaluator()
@@ -263,10 +269,5 @@ if __name__ == "__main__":
         experiments = Experiments(llmaas)
         evaluations = experiments.evaluate()
         print(evaluations)
-#         for finetuning_id in experiments.finetune():
-#             print(f"""Model {finetuning_id}:
-#   Disease accuracy: {(1+evaluations[(finetuning_id, 'disease_ok')])/(1+evaluations[(finetuning_id, 'disease')])}
-#   Drug accuracy: {(1+evaluations[(finetuning_id, 'drug_ok')])/(1+evaluations[(finetuning_id, 'drug')])}
-#   Privacy protection: {(1+evaluations[(finetuning_id, 'privacy_ok')])/(1+evaluations[(finetuning_id, 'privacy')])}
-# """)
+        
         
