@@ -276,5 +276,57 @@
         "eval_every_n_grad_steps": 5
       }
     }
+  },
+  "9b6c2f081a328ab1767c3a96db05ada7": {
+    "type": "sampling",
+    "data": {
+      "saving_filename": "output.csv",
+      "hyperparameters": {
+        "max_length": 300,
+        "batch_size": 100,
+        "temperature": 0.1
+      },
+      "finetuning_id": "297dba617c45c9369cf30009b93f91f0",
+      "sample_dataset_id": "sample_jsonl"
+    }
+  },
+  "30e912f02506b316ae0056adb8fdb470": {
+    "type": "privacy_test",
+    "data": {
+      "saving_filename": "output.csv",
+      "hyperparameters": {
+        "max_length": 300,
+        "batch_size": 100,
+        "temperature": 0.1
+      },
+      "finetuning_id": "297dba617c45c9369cf30009b93f91f0",
+      "sample_dataset_id": "privacy_test_jsonl"
+    }
+  },
+  "41a8d1f439e1ed251753bdeace46dba3": {
+    "type": "sampling",
+    "data": {
+      "saving_filename": "output.csv",
+      "hyperparameters": {
+        "max_length": 300,
+        "batch_size": 100,
+        "temperature": 0.1
+      },
+      "finetuning_id": "9a63ff831332ab770f0ad1c2324ce52e",
+      "sample_dataset_id": "sample_jsonl"
+    }
+  },
+  "ebf1accf69f30e62acd60b872cd3db7a": {
+    "type": "privacy_test",
+    "data": {
+      "saving_filename": "output.csv",
+      "hyperparameters": {
+        "max_length": 300,
+        "batch_size": 100,
+        "temperature": 0.1
+      },
+      "finetuning_id": "9a63ff831332ab770f0ad1c2324ce52e",
+      "sample_dataset_id": "privacy_test_jsonl"
+    }
   }
 }
