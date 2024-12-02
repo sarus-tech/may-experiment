@@ -412,5 +412,31 @@
       "finetuning_id": "1431b366504f975ce2020663350ce9b4",
       "sample_dataset_id": "privacy_test_jsonl"
     }
+  },
+  "e9129c21a53ab508831711d18aba90e0": {
+    "type": "sampling",
+    "data": {
+      "saving_filename": "output.csv",
+      "hyperparameters": {
+        "max_length": 300,
+        "batch_size": 100,
+        "temperature": 0.1
+      },
+      "finetuning_id": "33b448af9449af70e4f78f62ce2630fd",
+      "sample_dataset_id": "sample_jsonl"
+    }
+  },
+  "3834df65cfe2ca8ef719c720d7ef6f9d": {
+    "type": "privacy_test",
+    "data": {
+      "saving_filename": "output.csv",
+      "hyperparameters": {
+        "max_length": 300,
+        "batch_size": 100,
+        "temperature": 0.1
+      },
+      "finetuning_id": "33b448af9449af70e4f78f62ce2630fd",
+      "sample_dataset_id": "privacy_test_jsonl"
+    }
   }
 }
