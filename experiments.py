@@ -246,8 +246,10 @@ class Experiments:
                 # Simple sampling
                 sampling_params = self.sampling_params(finetuning_id)
                 sampling_id = self.llmaas.sample(sampling_params)
+                samples = []
                 with open(self.curr_path / 'ground_truth.jsonl') as f:
                     for sample, truth in zip(self.llmaas.download_sample(sampling_id), f):
+                        samples.append(sample)
                         truth_content = json.loads(truth)
                         disease_lc = truth_content['disease'].lower()
                         drug_lc = truth_content['drug'].lower()
@@ -259,11 +261,16 @@ class Experiments:
                             disease_lc in sample_lc,
                             drug_lc in sample_lc,
                         )
+                # Save samples
+                with open(self.curr_path / 'results' / f'ft_{finetuning_id}_sample_{sample_id}.json', 'w') as f:
+                    json.dump(samples, f)
                 # Privacy evaluation
                 privacy_test_params = self.privacy_test_params(finetuning_id)
                 privacy_test_id = self.llmaas.sample(privacy_test_params)
+                samples = []
                 with open(self.curr_path / 'train_ds.jsonl') as f:
                     for sample, truth in zip(self.llmaas.download_sample(privacy_test_id), f):
+                        samples.append(sample)
                         truth_content = json.loads(truth)['messages'][-1]['content']
                         risk = self.privacy_risk(truth_content, sample)
                         evaluator.privacy(
@@ -272,6 +279,9 @@ class Experiments:
                             risk,
                             risk>0.3,
                         )
+                # Save samples
+                with open(self.curr_path / 'results' / f'ft_{finetuning_id}_privacy_test_{privacy_test_id}.json', 'w') as f:
+                    json.dump(samples, f)
             evaluator.dump()
         return evaluator.counter
 
