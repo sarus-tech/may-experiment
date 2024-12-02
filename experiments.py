@@ -74,6 +74,8 @@ class Experiments:
         # Parameter grid
         # self.noise_multipliers = [0.01, 0.05, 0.1, 0.5, 1.0, 5.0]
         self.parameters = [
+                (False, 0, 0.01, 5e-5, 1),
+                (False, 0, 0.01, 5e-5, 10),
                 (False, 0, 0.01, 5e-5, 25),
                 (True, 0.1, 0.01, 5e-4, 25),
                 (True, 0.2, 0.01, 5e-4, 25),
