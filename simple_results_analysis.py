@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from termcolor import cprint
 from bisect import bisect_left
 
-with open('results/evaluation_on_37628_events.json', 'r') as f:
+with open('results/evaluation_on_56442_events.json', 'r') as f:
     packed_evaluation = json.load(f)
 
 # Unpack the evaluation
@@ -40,7 +40,7 @@ with open('train_counts.json', 'r') as f:
 
 evaluation_by_disease_count = Counter()
 count_buckets = [10, 20, 50, 100, 200]
-count_bucket_labels = ['[0 10[', '[10 20[', '[50 100[', '[50 100[', '[100 500[']
+count_bucket_labels = ['[0 10[', '[10 20[', '[20 50[', '[50 100[', '[100 200[', '≥200']
 for exp, nois in experiment_noise:
     cprint(f'Experiment {exp} with epsilon={nois}', 'blue')
     for disease, count in disease_count:
@@ -68,5 +68,7 @@ for exp, nois in experiment_noise:
 
 for k, (exp, nois) in enumerate(experiment_noise):
     buckets, acc = zip(*[(count_bucket_labels[i], acc) for e,i,acc in disease_accuracy_per_count if e==exp])
+    print(buckets)
+    print(acc)
     plt.plot(buckets, acc, linewidth=2, marker='o')
 plt.show()
