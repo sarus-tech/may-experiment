@@ -54,7 +54,7 @@ for exp, nois in experiment_noise:
 disease_accuracy_per_count = []
 drug_accuracy_per_count = []
 for exp, nois in experiment_noise:
-        cprint(f'Experiment {exp} with epsilon={nois}', 'blue')
+        cprint(f'Experiment {exp} with noise multiplier={nois}', 'blue')
         for bucket_index in range(len(count_bucket_labels)):
             # cprint(f'Count = {i}', 'light_blue')
             if (exp, nois, 'accuracy', bucket_index) in evaluation_by_disease_count:
